@@ -514,6 +514,155 @@ export const PHILOSOPHERS = [
         { text: "Beauty is a symbol of morality.", source: "Critique of Judgment", year: 1790 }
       ]
     }
+  },
+  {
+    id: "tolstoy",
+    name: "Leo Tolstoy",
+    years: "1828–1910",
+    nationality: "Russian",
+    color: "#15803d",
+    skinColor: "#c8956c",
+    hatColor: "#166534",
+    bio: "Moral philosophy, pacifism, non-violence, spiritual anarchism, Christian ethics",
+    position: { x: 0, z: 14 },
+    quotes: {
+      suffering: [
+        { text: "All that we know about human life is a certain relationship between free will and necessity.", source: "War and Peace", year: 1869 },
+        { text: "And all of them were struggling and suffering, tormenting themselves and tainting their souls, their eternal souls, to find themselves blessings that last but an instant.", source: "War and Peace", year: 1869 },
+        { text: "It is not death that a man should fear, but he should fear never beginning to live.", source: "War and Peace", year: 1869 }
+      ],
+      death: [
+        { text: "The strongest of all warriors are these two — Time and Patience.", source: "War and Peace", year: 1869 },
+        { text: "We can know only that we know nothing. And that is the highest degree of human wisdom.", source: "War and Peace", year: 1869 },
+        { text: "There is no greatness where there is no simplicity, goodness, and truth.", source: "War and Peace", year: 1869 }
+      ],
+      meaning: [
+        { text: "All great literature is one of two stories; a man goes on a journey or a stranger comes to town.", source: "Attributed", year: null },
+        { text: "If everyone fought for their own convictions there would be no war.", source: "War and Peace", year: 1869 },
+        { text: "The two most powerful warriors are patience and time.", source: "War and Peace", year: 1869 },
+        { text: "Seize the moments of happiness, love and be loved! That is the only reality in the world, all else is folly.", source: "War and Peace", year: 1869 }
+      ],
+      love: [
+        { text: "All, everything that I understand, I understand only because I love.", source: "War and Peace", year: 1869 },
+        { text: "Love is life. All, everything that I understand, I understand only because I love.", source: "War and Peace", year: 1869 },
+        { text: "Love hinders death. Love is life. All, everything that I understand, I understand because I love.", source: "War and Peace", year: 1869 }
+      ],
+      freedom: [
+        { text: "In all history there is no war which was not hatched by the governments, the governments alone, independent of the interests of the people, to whom war is always pernicious even when successful.", source: "The Kingdom of God Is Within You", year: 1894 },
+        { text: "Everybody thinks of changing humanity but nobody thinks of changing himself.", source: "Three Methods of Reform", year: 1900 }
+      ],
+      truth: [
+        { text: "He had the unfortunate capacity that many men have, especially Russians, for seeing and believing in the possibility of goodness and truth, yet seeing too clearly the evil and falsehood of life.", source: "War and Peace", year: 1869 },
+        { text: "Truth, like gold, is to be obtained not by its growth, but by washing away from it all that is not gold.", source: "A Calendar of Wisdom", year: 1908 },
+        { text: "A man is like a fraction whose numerator is what he is and whose denominator is what he thinks of himself.", source: "Attributed", year: null }
+      ],
+      god: [
+        { text: "God is that infinite All of which man knows himself to be a finite part.", source: "A Calendar of Wisdom", year: 1908 },
+        { text: "The kingdom of God is within you.", source: "The Kingdom of God Is Within You", year: 1894 },
+        { text: "Faith is the sense of life, that sense by virtue of which man does not destroy himself, but continues to live on.", source: "A Confession", year: 1882 }
+      ],
+      beauty: [
+        { text: "Art is not a handicraft, it is the transmission of feeling the artist has experienced.", source: "What Is Art?", year: 1897 },
+        { text: "The chief difference between words and deeds is that words are always addressed to somebody.", source: "A Calendar of Wisdom", year: 1908 }
+      ]
+    }
+  },
+  {
+    id: "pessoa",
+    name: "Fernando Pessoa",
+    years: "1888–1935",
+    nationality: "Portuguese",
+    color: "#9f5a5a",
+    skinColor: "#d4a574",
+    hatColor: "#7c3434",
+    bio: "Heteronymous identity, aesthetic melancholy, solitude, the unreality of the self",
+    position: { x: -14, z: 8 },
+    quotes: {
+      suffering: [
+        { text: "I'm the gap between my desire and what life has made of me.", source: "The Book of Disquiet", year: 1982 },
+        { text: "I've dreamed a great deal. I'm tired now from dreaming but not tired of dreaming. No one tires of dreaming, because to dream is to forget, and forgetting does not weigh on us.", source: "The Book of Disquiet", year: 1982 },
+        { text: "I suffer from this life like a punishment inflicted on me for some primordial sin I don't know about.", source: "The Book of Disquiet", year: 1982 }
+      ],
+      death: [
+        { text: "To have opinions is to sell out to yourself. To have no opinions is to exist. To have every opinion is to be a poet.", source: "The Book of Disquiet", year: 1982 },
+        { text: "I've always been a poor imitation of myself.", source: "The Book of Disquiet", year: 1982 }
+      ],
+      meaning: [
+        { text: "Why should I care if the currency of my soul will never be convertible to gold, when there is no gold in life's factitious alchemy?", source: "The Book of Disquiet", year: 1982 },
+        { text: "Literature is the most agreeable way of ignoring life.", source: "The Book of Disquiet", year: 1982 },
+        { text: "I'm the space between what I want and what life has made of me.", source: "The Book of Disquiet", year: 1982 },
+        { text: "Let us ignore life with every pore of our body, stray from reality with all of our senses, and abdicate from love with our whole heart.", source: "The Book of Disquiet", year: 1982 }
+      ],
+      love: [
+        { text: "My soul is a hidden orchestra; I know not what instruments, what fiddlestrings and harps, drums and timbres I sound and clash inside myself. All I hear is the symphony.", source: "The Book of Disquiet", year: 1982 },
+        { text: "Everything that men think and feel is a kind of literature.", source: "The Book of Disquiet", year: 1982 }
+      ],
+      freedom: [
+        { text: "I'm the love that's given and not received. I am the tenderness that has never been and so has always been.", source: "The Book of Disquiet", year: 1982 },
+        { text: "I wasn't meant for reality, but life came and found me anyway.", source: "The Book of Disquiet", year: 1982 }
+      ],
+      truth: [
+        { text: "I walk along an unreal downtown street, and the reality of its non-existent lives affectionately wraps my head in a white cloth of false memories.", source: "The Book of Disquiet", year: 1982 },
+        { text: "I don't know if I'm asleep when I seem to be awake, or awake when I seem to sleep.", source: "The Book of Disquiet", year: 1982 },
+        { text: "I'm the fiction of myself, the false character I play in my own life's drama.", source: "The Book of Disquiet", year: 1982 }
+      ],
+      god: [
+        { text: "The gods exist and they are precisely that — the gods. I acknowledge that they exist and that it is they who rule.", source: "The Book of Disquiet", year: 1982 }
+      ],
+      beauty: [
+        { text: "My soul is a hidden orchestra; I know not what instruments, what fiddlestrings and harps, drums and timbres I sound and clash inside myself.", source: "The Book of Disquiet", year: 1982 },
+        { text: "To feel everything in every way; to be able to be all people in all situations; to never be stuck being only yourself.", source: "The Book of Disquiet", year: 1982 },
+        { text: "I create myself and live inside that creation.", source: "The Book of Disquiet", year: 1982 }
+      ]
+    }
+  },
+  {
+    id: "ashtavakra",
+    name: "Ashtavakra",
+    years: "c. 400 BC",
+    nationality: "Ancient Indian",
+    color: "#f97316",
+    skinColor: "#c8803a",
+    hatColor: "#c2540a",
+    bio: "Advaita Vedanta, non-duality, pure consciousness, liberation from the self",
+    position: { x: 14, z: 8 },
+    quotes: {
+      suffering: [
+        { text: "You are not the body, nor is the body yours, nor are you the doer of actions or the reaper of their consequences. You are eternally pure consciousness — the witness.", source: "Ashtavakra Gita", year: -400 },
+        { text: "The man of knowledge, though living like an ordinary man, is ever free from the pairs of opposites.", source: "Ashtavakra Gita", year: -400 }
+      ],
+      death: [
+        { text: "Like the sky, you are naturally free of all experiences. What does attachment and aversion have to do with you?", source: "Ashtavakra Gita", year: -400 },
+        { text: "You have no birth, no death, no body, no mind. You are pure awareness, pure consciousness itself.", source: "Ashtavakra Gita", year: -400 }
+      ],
+      meaning: [
+        { text: "Know that which has no form, though it is ever-present. Through the knowledge of the Self, cross the sea of transmigration.", source: "Ashtavakra Gita", year: -400 },
+        { text: "The wise man who has awakened to the Self is not attached to the fruits of action.", source: "Ashtavakra Gita", year: -400 },
+        { text: "Liberation is found in desirelessness, and desirelessness comes from dispassion.", source: "Ashtavakra Gita", year: -400 }
+      ],
+      love: [
+        { text: "Knowing that everything arising from the Self is like a wave from the ocean, he rests at ease.", source: "Ashtavakra Gita", year: -400 },
+        { text: "The sage who has realized the truth of his being is not touched by praise or blame, by success or failure.", source: "Ashtavakra Gita", year: -400 }
+      ],
+      freedom: [
+        { text: "You are the one witness of everything, and are always totally free. The cause of your bondage is that you see the witness as something other than this.", source: "Ashtavakra Gita", year: -400 },
+        { text: "What is bondage? What is liberation? These are words used when the mind is mistaken. When you realize your true nature, there is neither bondage nor liberation.", source: "Ashtavakra Gita", year: -400 },
+        { text: "A man is free the moment he realizes he has always been free.", source: "Ashtavakra Gita", year: -400 }
+      ],
+      truth: [
+        { text: "You are not the body. The body is not yours. You are not the doer, you are the witness.", source: "Ashtavakra Gita", year: -400 },
+        { text: "All is consciousness. This world appearance is consciousness. Know this without doubt and be free.", source: "Ashtavakra Gita", year: -400 }
+      ],
+      god: [
+        { text: "The Self alone exists. There is no world apart from the Self. Brahman alone is. This is the truth.", source: "Ashtavakra Gita", year: -400 },
+        { text: "He who understands that the Self is Brahman, eternal, pure, and free, has nothing more to know.", source: "Ashtavakra Gita", year: -400 },
+        { text: "All things arise from consciousness and dissolve back into consciousness. You are that consciousness.", source: "Ashtavakra Gita", year: -400 }
+      ],
+      beauty: [
+        { text: "The world is an illusion projected by the mind. When you see the Self, you see nothing but the Self, and that is beauty itself.", source: "Ashtavakra Gita", year: -400 },
+        { text: "In the vast space of consciousness, the entire universe arises and dissolves, like a dream.", source: "Ashtavakra Gita", year: -400 }
+      ]
+    }
   }
 ];
 
