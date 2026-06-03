@@ -3,11 +3,16 @@ import { createServer } from 'http'
 import { Server } from 'socket.io'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { converseRoute } from './routes/converse.js'
+import { uploadRoute } from './routes/upload.js'
 import { getPhilosopherResponse } from './agents/PhilosopherAgent.js'
 import { PHILOSOPHERS, pickConversationTopic, TOPIC_LABELS } from '../../shared/philosophersData.js'
 
 dotenv.config()
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const app = express()
 const httpServer = createServer(app)
@@ -16,8 +21,13 @@ const io = new Server(httpServer, { cors: { origin: '*' } })
 app.use(cors())
 app.use(express.json())
 
+// Serve upload UI at /upload
+app.use('/upload', express.static(path.join(__dirname, '../public')))
+app.get('/upload', (_req, res) => res.sendFile(path.join(__dirname, '../public/upload.html')))
+
 // Routes
 app.use('/api', converseRoute)
+app.use('/api', uploadRoute)
 
 // Socket.io — track connected clients and support real-time conversations
 io.on('connection', (socket) => {

@@ -1,11 +1,32 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { PHILOSOPHERS } from '../../../shared/philosophersData.js'
+import { getLibraryQuotesForPhilosopher } from './BookProcessor.js'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-// Build system prompt for each philosopher using their real quotes
+// Merge static quotes with any extracted from uploaded books
+function buildMergedQuotes(philosopher) {
+  const merged = {}
+  // Start with static curated quotes
+  Object.entries(philosopher.quotes).forEach(([topic, quotes]) => {
+    merged[topic] = [...quotes]
+  })
+  // Add library quotes extracted from uploaded books
+  const libraryQuotes = getLibraryQuotesForPhilosopher(philosopher.id)
+  Object.entries(libraryQuotes).forEach(([topic, quotes]) => {
+    if (!merged[topic]) merged[topic] = []
+    quotes.forEach(q => {
+      const exists = merged[topic].some(e => e.text.slice(0, 40) === q.text.slice(0, 40))
+      if (!exists) merged[topic].push(q)
+    })
+  })
+  return merged
+}
+
+// Build system prompt for each philosopher using their real quotes (static + uploaded)
 function buildSystemPrompt(philosopher) {
-  const allQuotes = Object.entries(philosopher.quotes)
+  const mergedQuotes = buildMergedQuotes(philosopher)
+  const allQuotes = Object.entries(mergedQuotes)
     .map(([topic, quotes]) =>
       `## ${topic.toUpperCase()}\n${quotes
         .map(q => `- "${q.text}" — ${q.source}${q.year ? ` (${q.year})` : ''}`)
@@ -13,8 +34,14 @@ function buildSystemPrompt(philosopher) {
     )
     .join('\n\n')
 
+  const libraryCount = Object.values(getLibraryQuotesForPhilosopher(philosopher.id))
+    .reduce((s, a) => s + a.length, 0)
+  const libraryNote = libraryCount > 0
+    ? `\n[${libraryCount} additional quotes loaded from uploaded texts]`
+    : ''
+
   return `You are ${philosopher.name} (${philosopher.years}), ${philosopher.nationality} philosopher.
-Your philosophical focus: ${philosopher.bio}
+Your philosophical focus: ${philosopher.bio}${libraryNote}
 
 You speak ONLY in actual quotes from your works. You may select and combine quotes but never invent new statements.
 
@@ -33,10 +60,11 @@ export async function getPhilosopherResponse(philosopherId, topic, otherPhilosop
   const philosopher = PHILOSOPHERS.find(p => p.id === philosopherId)
   if (!philosopher) throw new Error(`Philosopher ${philosopherId} not found`)
 
-  // Fallback helper — pick a random quote from the topic (or meaning as default)
+  // Fallback helper — pick from merged quote pool (static + uploaded books)
   function randomQuote() {
-    const quotes = philosopher.quotes[topic] || philosopher.quotes.meaning
-    return quotes[Math.floor(Math.random() * quotes.length)]
+    const merged = buildMergedQuotes(philosopher)
+    const pool = merged[topic] || merged.meaning || merged.suffering || []
+    return pool[Math.floor(Math.random() * pool.length)] || { text: '...', source: 'Unknown', year: null }
   }
 
   // Use fallback when no API key is configured

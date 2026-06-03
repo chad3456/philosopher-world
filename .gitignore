@@ -4,3 +4,8 @@ server/node_modules/
 client/dist/
 *.local
 .env
+# Uploaded books are not committed (can be large)
+server/uploads/
+# Processed quotes ARE committed so agents share knowledge
+!server/processed/
+!server/processed/library.json
