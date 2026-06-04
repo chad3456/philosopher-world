@@ -10,6 +10,21 @@ export default function App() {
   const [selectedPhilosopher, setSelectedPhilosopher] = useState(null)
   const [speed, setSpeed] = useState(1)
   const [loading, setLoading] = useState(true)
+  const [voiceEnabled, setVoiceEnabled] = useState(true)
+  const voiceSystemRef = useRef(null)
+
+  const handleVoiceToggle = useCallback(() => {
+    if (voiceSystemRef.current) {
+      const enabled = voiceSystemRef.current.toggle()
+      setVoiceEnabled(enabled)
+    } else {
+      setVoiceEnabled(v => !v)
+    }
+  }, [])
+
+  const handleVoiceReady = useCallback((voiceSystem) => {
+    voiceSystemRef.current = voiceSystem
+  }, [])
 
   // Map from convId -> conversation object (for updating quotes as they arrive)
   const conversationsMapRef = useRef(new Map())
@@ -94,6 +109,8 @@ export default function App() {
         speed={speed}
         onSpeedChange={setSpeed}
         activeCount={activeCount}
+        voiceEnabled={voiceEnabled}
+        onVoiceToggle={handleVoiceToggle}
       />
 
       <VillageCanvas
@@ -102,6 +119,8 @@ export default function App() {
         onQuoteDelivered={handleQuoteDelivered}
         onConversationEnd={handleConversationEnd}
         onPhilosopherSelect={setSelectedPhilosopher}
+        voiceEnabled={voiceEnabled}
+        onVoiceReady={handleVoiceReady}
       />
 
       <ConversationFeed conversations={conversations} />

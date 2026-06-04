@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export function TopBar({ speed, onSpeedChange, activeCount }) {
+export function TopBar({ speed, onSpeedChange, activeCount, voiceEnabled, onVoiceToggle }) {
   const [showAbout, setShowAbout] = useState(false)
 
   return (
@@ -29,6 +29,17 @@ export function TopBar({ speed, onSpeedChange, activeCount }) {
               </button>
             ))}
           </div>
+
+          {onVoiceToggle && (
+            <button
+              className={`speed-btn${voiceEnabled ? ' active' : ''}`}
+              onClick={onVoiceToggle}
+              title={voiceEnabled ? 'Disable voice' : 'Enable voice'}
+              style={{ minWidth: '2.2rem' }}
+            >
+              {voiceEnabled ? '🔊' : '🔇'}
+            </button>
+          )}
 
           <button className="about-btn" onClick={() => setShowAbout(true)}>
             About

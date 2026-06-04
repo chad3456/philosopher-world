@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { buildCharacter, applyTalkingTick, applyListeningTick, applyIdleTick } from './CharacterBuilder.js'
 
 function terrainHeight(x, z) {
   return Math.sin(x * 0.1) * 3 + Math.sin(z * 0.15) * 2 + Math.sin(x * 0.3 + z * 0.2) * 1 + 2
@@ -476,64 +477,19 @@ export class World {
   addPhilosopher(philosopherData) {
     if (this.philosopherMeshes.has(philosopherData.id)) return
 
-    const group = new THREE.Group()
-    group.userData.philosopherId = philosopherData.id
+    // Build the detailed chibi character
+    const group = buildCharacter(philosopherData)
 
-    const bodyColor = new THREE.Color(philosopherData.color)
-    const skinColor = new THREE.Color(philosopherData.skinColor)
-
-    // Body: use CylinderGeometry as fallback for wider compatibility
-    const bodyGeo = new THREE.CylinderGeometry(0.22, 0.28, 0.7, 8)
-    const bodyMat = new THREE.MeshLambertMaterial({ color: bodyColor })
-    const body = new THREE.Mesh(bodyGeo, bodyMat)
-    body.position.y = 0.65
-    body.castShadow = true
-    body.userData.philosopherId = philosopherData.id
-    group.add(body)
-
-    // Robe/cloak detail
-    const robeGeo = new THREE.CylinderGeometry(0.3, 0.35, 0.4, 8)
-    const robeMat = new THREE.MeshLambertMaterial({
-      color: bodyColor.clone().multiplyScalar(0.75)
-    })
-    const robe = new THREE.Mesh(robeGeo, robeMat)
-    robe.position.y = 0.25
-    robe.castShadow = true
-    robe.userData.philosopherId = philosopherData.id
-    group.add(robe)
-
-    // Head
-    const headGeo = new THREE.SphereGeometry(0.2, 10, 8)
-    const headMat = new THREE.MeshLambertMaterial({ color: skinColor })
-    const head = new THREE.Mesh(headGeo, headMat)
-    head.position.y = 1.15
-    head.castShadow = true
-    head.userData.philosopherId = philosopherData.id
-    group.add(head)
-
-    // Hat/hair
-    const hatColor = new THREE.Color(philosopherData.hatColor || '#333333')
-    const hatGeo = new THREE.CylinderGeometry(0.14, 0.22, 0.18, 8)
-    const hatMat = new THREE.MeshLambertMaterial({ color: hatColor })
-    const hat = new THREE.Mesh(hatGeo, hatMat)
-    hat.position.y = 1.38
-    hat.userData.philosopherId = philosopherData.id
-    group.add(hat)
-
-    // Hat brim
-    const brimGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.04, 10)
-    const brim = new THREE.Mesh(brimGeo, hatMat)
-    brim.position.y = 1.28
-    brim.userData.philosopherId = philosopherData.id
-    group.add(brim)
-
-    // Position
+    // Position on terrain
     const { x, z } = philosopherData.position
     const h = terrainHeight(x, z)
     group.position.set(x, h, z)
 
     this.philosopherMeshes.set(philosopherData.id, group)
-    this.philosopherStates.set(philosopherData.id, { state: 'wandering', bobPhase: Math.random() * Math.PI * 2 })
+    this.philosopherStates.set(philosopherData.id, {
+      state: 'wandering',
+      bobPhase: Math.random() * Math.PI * 2
+    })
     this.scene.add(group)
   }
 
@@ -558,14 +514,17 @@ export class World {
       group.rotation.y += (targetAngle - group.rotation.y) * 0.1
     }
 
-    // Bob animation when walking
+    // State-based animations using CharacterBuilder helpers
+    const t = this.clock.getElapsedTime()
     if (state === 'wandering') {
       stateData.bobPhase = (stateData.bobPhase || 0) + 0.08
-      group.position.y += Math.sin(stateData.bobPhase) * 0.03
+      group.position.y += Math.sin(stateData.bobPhase) * 0.025
+      applyIdleTick(group, t)
+      applyListeningTick(group, t)
     } else if (state === 'talking') {
-      // Gentle idle sway
       stateData.bobPhase = (stateData.bobPhase || 0) + 0.025
-      group.rotation.y += Math.sin(stateData.bobPhase) * 0.005
+      group.rotation.y += Math.sin(stateData.bobPhase) * 0.004
+      applyTalkingTick(group, t)
     }
 
     this.philosopherStates.set(id, stateData)
@@ -678,6 +637,26 @@ export class World {
     }, duration)
 
     this.speechBubbles.set(philosopherId, { sprite, timer })
+  }
+
+  clearSpeechBubble(philosopherId) {
+    this._removeSpeechBubble(philosopherId)
+  }
+
+  setCharacterState(id, state) {
+    const stateData = this.philosopherStates.get(id)
+    if (stateData) stateData.state = state
+  }
+
+  faceToward(fromId, towardId) {
+    const from = this.philosopherMeshes.get(fromId)
+    const to = this.philosopherMeshes.get(towardId)
+    if (!from || !to) return
+    const dx = to.position.x - from.position.x
+    const dz = to.position.z - from.position.z
+    if (Math.abs(dx) + Math.abs(dz) > 0.01) {
+      from.rotation.y = Math.atan2(dx, dz)
+    }
   }
 
   _removeSpeechBubble(philosopherId) {

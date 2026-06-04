@@ -53,6 +53,7 @@ export class SimulationLoop {
     this.tickTimer = null
     this.wanderTimer = null
     this.activeConversations = new Set()
+    this.pendingQuotes = {}
 
     this.philosophers = {}
     PHILOSOPHERS.forEach(p => {
@@ -69,6 +70,16 @@ export class SimulationLoop {
         waitTimer: 0
       }
     })
+  }
+
+  // Called by VillageCanvas after each quote's voice/display finishes
+  quoteDone(convId, index) {
+    const key = `${convId}-${index}`
+    const resolve = this.pendingQuotes[key]
+    if (resolve) {
+      delete this.pendingQuotes[key]
+      resolve()
+    }
   }
 
   start() {
@@ -199,21 +210,35 @@ export class SimulationLoop {
       timestamp: new Date().toISOString()
     })
 
-    // Schedule quote delivery
-    quotes.forEach((quote, i) => {
-      const delay = 800 + i * (QUOTE_DISPLAY_MS + QUOTE_GAP_MS)
-      setTimeout(() => {
-        if (this.activeConversations.has(convId)) {
-          this.onQuoteDelivered(convId, i, quote)
-        }
-      }, delay / Math.max(1, this.speed))
-    })
+    // Sequential turn-based quote delivery
+    const deliverNext = (quoteIndex) => {
+      if (!this.activeConversations.has(convId)) return
 
-    // End conversation
-    const totalDuration = 800 + quotes.length * (QUOTE_DISPLAY_MS + QUOTE_GAP_MS) + 1000
-    setTimeout(() => {
-      this._endConversation(convId, p1Id, p2Id)
-    }, totalDuration / Math.max(1, this.speed))
+      if (quoteIndex >= quotes.length) {
+        this._endConversation(convId, p1Id, p2Id)
+        return
+      }
+
+      const q = quotes[quoteIndex]
+      const speakerId = q.speaker
+      const listenerId = speakerId === p1Id ? p2Id : p1Id
+
+      this.onQuoteDelivered(convId, quoteIndex, q, speakerId, listenerId)
+
+      // Store resolver — VillageCanvas calls quoteDone() when voice finishes
+      this.pendingQuotes[`${convId}-${quoteIndex}`] = () => {
+        setTimeout(() => deliverNext(quoteIndex + 1), 800 / Math.max(1, this.speed))
+      }
+
+      // Safety fallback: if quoteDone is never called (no voice system), advance after timeout
+      const safetyMs = (QUOTE_DISPLAY_MS + QUOTE_GAP_MS + 20000) / Math.max(1, this.speed)
+      setTimeout(() => {
+        this.quoteDone(convId, quoteIndex)
+      }, safetyMs)
+    }
+
+    // Small delay before first quote so philosophers can walk toward each other
+    setTimeout(() => deliverNext(0), 800 / Math.max(1, this.speed))
   }
 
   _endConversation(convId, p1Id, p2Id) {
