@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export function TopBar({ speed, onSpeedChange, activeCount, voiceEnabled, onVoiceToggle }) {
+export function TopBar({ speed, onSpeedChange, activeCount, voiceEnabled, onVoiceToggle, followedPhilosopher, onChangePhilosopher }) {
   const [showAbout, setShowAbout] = useState(false)
 
   return (
@@ -12,6 +12,34 @@ export function TopBar({ speed, onSpeedChange, activeCount, voiceEnabled, onVoic
         </div>
 
         <div className="top-bar-controls">
+          {followedPhilosopher ? (
+            <button
+              className="speed-btn active"
+              onClick={onChangePhilosopher}
+              title="Change philosopher"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                paddingLeft: 8, paddingRight: 10, fontFamily: 'serif'
+              }}
+            >
+              <div style={{
+                width: 16, height: 16, borderRadius: '50%',
+                background: followedPhilosopher.color, flexShrink: 0
+              }} />
+              {followedPhilosopher.name.split(' ').pop()}
+              <span style={{ opacity: 0.6, fontSize: 11 }}>✕</span>
+            </button>
+          ) : (
+            <button
+              className="speed-btn"
+              onClick={onChangePhilosopher}
+              title="Choose a philosopher to follow"
+              style={{ fontFamily: 'serif', color: '#a09070' }}
+            >
+              👁 Follow
+            </button>
+          )}
+
           <div className="active-badge">
             <div className="pulse-dot" />
             {activeCount} active {activeCount === 1 ? 'dialogue' : 'dialogues'}

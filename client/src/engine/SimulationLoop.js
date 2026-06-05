@@ -54,6 +54,7 @@ export class SimulationLoop {
     this.wanderTimer = null
     this.activeConversations = new Set()
     this.pendingQuotes = {}
+    this.followedId = null
 
     this.philosophers = {}
     PHILOSOPHERS.forEach(p => {
@@ -70,6 +71,10 @@ export class SimulationLoop {
         waitTimer: 0
       }
     })
+  }
+
+  setFollowedPhilosopher(id) {
+    this.followedId = id
   }
 
   // Called by VillageCanvas after each quote's voice/display finishes
@@ -174,6 +179,8 @@ export class SimulationLoop {
 
     if (!q1 || !q2) return
 
+    const isForeground = !this.followedId || p1Id === this.followedId || p2Id === this.followedId
+
     const quotes = [
       { speaker: p1Id, ...q1 },
       { speaker: p2Id, ...q2 },
@@ -207,7 +214,8 @@ export class SimulationLoop {
       topic,
       topicLabel,
       quotes,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      isForeground
     })
 
     // Sequential turn-based quote delivery
@@ -223,7 +231,7 @@ export class SimulationLoop {
       const speakerId = q.speaker
       const listenerId = speakerId === p1Id ? p2Id : p1Id
 
-      this.onQuoteDelivered(convId, quoteIndex, q, speakerId, listenerId)
+      this.onQuoteDelivered(convId, quoteIndex, q, speakerId, listenerId, isForeground)
 
       // Store resolver — VillageCanvas calls quoteDone() when voice finishes
       this.pendingQuotes[`${convId}-${quoteIndex}`] = () => {

@@ -16,6 +16,9 @@ export class World {
     this.fireflies = []
     this.onFrame = null
     this.onPhilosopherClick = null
+    this._cameraMode = 'free'
+    this._followedId = null
+    this._convFocus = null
 
     this._initRenderer()
     this._initScene()
@@ -639,6 +642,26 @@ export class World {
     this.speechBubbles.set(philosopherId, { sprite, timer })
   }
 
+  followPhilosopher(id) {
+    this._followedId = id
+    this._cameraMode = 'follow'
+  }
+
+  unfollowPhilosopher() {
+    this._followedId = null
+    this._cameraMode = 'free'
+  }
+
+  focusConversation(p1Id, p2Id) {
+    this._cameraMode = 'conversation'
+    this._convFocus = [p1Id, p2Id]
+  }
+
+  endFocusConversation() {
+    this._convFocus = null
+    this._cameraMode = this._followedId ? 'follow' : 'free'
+  }
+
   clearSpeechBubble(philosopherId) {
     this._removeSpeechBubble(philosopherId)
   }
@@ -721,6 +744,28 @@ export class World {
     })
   }
 
+  _updateCameraFollow() {
+    if (this._cameraMode === 'follow' && this._followedId) {
+      const mesh = this.philosopherMeshes.get(this._followedId)
+      if (mesh) {
+        this._orbit.target.lerp(mesh.position, 0.05)
+        this._orbit.radius += (22 - this._orbit.radius) * 0.025
+        this._updateCameraFromOrbit()
+      }
+    } else if (this._cameraMode === 'conversation' && this._convFocus) {
+      const m1 = this.philosopherMeshes.get(this._convFocus[0])
+      const m2 = this.philosopherMeshes.get(this._convFocus[1])
+      if (m1 && m2) {
+        const mid = new THREE.Vector3()
+          .addVectors(m1.position, m2.position)
+          .multiplyScalar(0.5)
+        this._orbit.target.lerp(mid, 0.06)
+        this._orbit.radius += (9 - this._orbit.radius) * 0.04
+        this._updateCameraFromOrbit()
+      }
+    }
+  }
+
   _updateFireflies(elapsed) {
     this.fireflies.forEach((ff) => {
       const { basePos, phase, speed, radius } = ff.userData
@@ -742,6 +787,7 @@ export class World {
       this._updateDayNightCycle(elapsed)
       this._updateFireflies(elapsed)
       this._updateSpeechBubblePositions()
+      this._updateCameraFollow()
 
       if (this.onFrame) this.onFrame(elapsed)
 

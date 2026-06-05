@@ -3,6 +3,7 @@ import { VillageCanvas } from './components/VillageCanvas'
 import { ConversationFeed } from './components/ConversationFeed'
 import { TopBar } from './components/TopBar'
 import { PhilosopherCard } from './components/PhilosopherCard'
+import { PhilosopherSelector } from './components/PhilosopherSelector'
 import { PHILOSOPHERS } from './data/philosophers.js'
 
 export default function App() {
@@ -10,8 +11,12 @@ export default function App() {
   const [selectedPhilosopher, setSelectedPhilosopher] = useState(null)
   const [speed, setSpeed] = useState(1)
   const [loading, setLoading] = useState(true)
+  const [showSelector, setShowSelector] = useState(false)
+  const [followedId, setFollowedId] = useState(null)
   const [voiceEnabled, setVoiceEnabled] = useState(true)
   const voiceSystemRef = useRef(null)
+
+  const followedPhilosopher = followedId ? PHILOSOPHERS.find(p => p.id === followedId) : null
 
   const handleVoiceToggle = useCallback(() => {
     if (voiceSystemRef.current) {
@@ -30,31 +35,30 @@ export default function App() {
   const conversationsMapRef = useRef(new Map())
 
   useEffect(() => {
-    // Hide loading after a short delay
-    const t = setTimeout(() => setLoading(false), 1200)
+    const t = setTimeout(() => {
+      setLoading(false)
+      setShowSelector(true)
+    }, 1200)
     return () => clearTimeout(t)
   }, [])
 
+  const handleSelect = useCallback((id) => {
+    setFollowedId(id)
+    setShowSelector(false)
+  }, [])
+
   const handleConversationStart = useCallback((conv) => {
-    // Build initial conversation entry with empty visible quotes
     const entry = {
       id: conv.id,
-      p1: {
-        id: conv.p1.id,
-        name: conv.p1.name,
-        color: conv.p1.color
-      },
-      p2: {
-        id: conv.p2.id,
-        name: conv.p2.name,
-        color: conv.p2.color
-      },
+      p1: { id: conv.p1.id, name: conv.p1.name, color: conv.p1.color },
+      p2: { id: conv.p2.id, name: conv.p2.name, color: conv.p2.color },
       topic: conv.topic,
       topicLabel: conv.topicLabel,
       quotes: [],
       allQuotes: conv.quotes,
       timestamp: conv.timestamp,
-      active: true
+      active: true,
+      isForeground: conv.isForeground !== false
     }
 
     conversationsMapRef.current.set(conv.id, entry)
@@ -105,12 +109,16 @@ export default function App() {
         </div>
       </div>
 
+      {showSelector && <PhilosopherSelector onSelect={handleSelect} />}
+
       <TopBar
         speed={speed}
         onSpeedChange={setSpeed}
         activeCount={activeCount}
         voiceEnabled={voiceEnabled}
         onVoiceToggle={handleVoiceToggle}
+        followedPhilosopher={followedPhilosopher}
+        onChangePhilosopher={() => setShowSelector(true)}
       />
 
       <VillageCanvas
@@ -121,9 +129,10 @@ export default function App() {
         onPhilosopherSelect={setSelectedPhilosopher}
         voiceEnabled={voiceEnabled}
         onVoiceReady={handleVoiceReady}
+        followedId={followedId}
       />
 
-      <ConversationFeed conversations={conversations} />
+      <ConversationFeed conversations={conversations} followedId={followedId} />
 
       {selectedPhilosopher && (
         <PhilosopherCard
