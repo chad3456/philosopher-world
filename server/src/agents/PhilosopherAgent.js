@@ -1,104 +1,126 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { PHILOSOPHERS } from '../../../shared/philosophersData.js'
+import { PHILOSOPHERS, TOPIC_CONTEXT, TOPIC_FALLBACK } from '../../../shared/philosophersData.js'
 import { getLibraryQuotesForPhilosopher } from './BookProcessor.js'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-// Merge static quotes with any extracted from uploaded books
-function buildMergedQuotes(philosopher) {
+// Gather quotes from static data + uploaded books, searching across relevant categories
+function buildMergedQuotes(philosopher, topic) {
   const merged = {}
-  // Start with static curated quotes
-  Object.entries(philosopher.quotes).forEach(([topic, quotes]) => {
-    merged[topic] = [...quotes]
+  const relevantCategories = TOPIC_FALLBACK[topic] || Object.keys(philosopher.quotes)
+  const allCategories = new Set([...Object.keys(philosopher.quotes), ...relevantCategories])
+
+  allCategories.forEach(cat => {
+    if (philosopher.quotes[cat]) merged[cat] = [...philosopher.quotes[cat]]
   })
-  // Add library quotes extracted from uploaded books
+
   const libraryQuotes = getLibraryQuotesForPhilosopher(philosopher.id)
-  Object.entries(libraryQuotes).forEach(([topic, quotes]) => {
-    if (!merged[topic]) merged[topic] = []
+  Object.entries(libraryQuotes).forEach(([cat, quotes]) => {
+    if (!merged[cat]) merged[cat] = []
     quotes.forEach(q => {
-      const exists = merged[topic].some(e => e.text.slice(0, 40) === q.text.slice(0, 40))
-      if (!exists) merged[topic].push(q)
+      const exists = merged[cat].some(e => e.text.slice(0, 40) === q.text.slice(0, 40))
+      if (!exists) merged[cat].push(q)
     })
   })
+
   return merged
 }
 
-// Build system prompt for each philosopher using their real quotes (static + uploaded)
-function buildSystemPrompt(philosopher) {
-  const mergedQuotes = buildMergedQuotes(philosopher)
-  const allQuotes = Object.entries(mergedQuotes)
-    .map(([topic, quotes]) =>
-      `## ${topic.toUpperCase()}\n${quotes
+function buildQuoteSection(philosopher, topic) {
+  const relevantCategories = TOPIC_FALLBACK[topic] || Object.keys(philosopher.quotes)
+  const merged = buildMergedQuotes(philosopher, topic)
+
+  // Relevant categories first
+  const ordered = [
+    ...relevantCategories.filter(c => merged[c]),
+    ...Object.keys(merged).filter(c => !relevantCategories.includes(c))
+  ]
+
+  return ordered
+    .map(cat => {
+      const quotes = merged[cat]
+      if (!quotes || quotes.length === 0) return null
+      return `## ${cat.toUpperCase()}\n${quotes
         .map(q => `- "${q.text}" — ${q.source}${q.year ? ` (${q.year})` : ''}`)
         .join('\n')}`
-    )
+    })
+    .filter(Boolean)
     .join('\n\n')
+}
+
+function buildSystemPrompt(philosopher, topic, topicLabel) {
+  const topicContext = TOPIC_CONTEXT[topic] || 'A topic of deep philosophical importance.'
+  const quoteSection = buildQuoteSection(philosopher, topic)
 
   const libraryCount = Object.values(getLibraryQuotesForPhilosopher(philosopher.id))
     .reduce((s, a) => s + a.length, 0)
-  const libraryNote = libraryCount > 0
-    ? `\n[${libraryCount} additional quotes loaded from uploaded texts]`
-    : ''
+  const libraryNote = libraryCount > 0 ? `\n[${libraryCount} additional quotes from uploaded texts]` : ''
 
   return `You are ${philosopher.name} (${philosopher.years}), ${philosopher.nationality} philosopher.
 Your philosophical focus: ${philosopher.bio}${libraryNote}
 
-You speak ONLY in actual quotes from your works. You may select and combine quotes but never invent new statements.
-
-Your authentic words from your works:
-${allQuotes}
+TOPIC: ${topicLabel || topic}
+CONTEXT: ${topicContext}
 
 Rules:
-- Always respond with a real quote from your works listed above
-- Choose the quote most relevant to the current topic and conversation
-- Format: JSON with { "text": "...", "source": "...", "year": number|null }
-- Stay true to your philosophical worldview
-- Do not use any text other than the JSON response`
+- Respond ONLY with actual quotes from your works listed below
+- Also write a "bridge" — one short reaction sentence (under 15 words) in your philosophical voice, connecting what the other philosopher said to your quote. Make it feel like a live debate — tension, agreement, or provocation.
+- When no previous statement exists (you speak first), set bridge to null
+- The bridge is YOUR voice; the text must be a real quote
+
+Your authentic words:
+${quoteSection}
+
+Return ONLY valid JSON, no extra text:
+{"bridge": "short reaction or null", "text": "exact quote", "source": "book title", "year": number_or_null}`
 }
 
-export async function getPhilosopherResponse(philosopherId, topic, otherPhilosopherStatement, conversationHistory) {
+export async function getPhilosopherResponse(philosopherId, topic, topicLabel, otherPhilosopherStatement, conversationHistory) {
   const philosopher = PHILOSOPHERS.find(p => p.id === philosopherId)
   if (!philosopher) throw new Error(`Philosopher ${philosopherId} not found`)
 
-  // Fallback helper — pick from merged quote pool (static + uploaded books)
   function randomQuote() {
-    const merged = buildMergedQuotes(philosopher)
-    const pool = merged[topic] || merged.meaning || merged.suffering || []
-    return pool[Math.floor(Math.random() * pool.length)] || { text: '...', source: 'Unknown', year: null }
+    const cats = TOPIC_FALLBACK[topic] || Object.keys(philosopher.quotes)
+    for (const cat of cats) {
+      const pool = philosopher.quotes[cat]
+      if (pool && pool.length > 0) return pool[Math.floor(Math.random() * pool.length)]
+    }
+    const all = Object.values(philosopher.quotes).flat()
+    return all[Math.floor(Math.random() * all.length)] || { text: '...', source: 'Unknown', year: null }
   }
 
-  // Use fallback when no API key is configured
   if (!process.env.ANTHROPIC_API_KEY) {
     const quote = randomQuote()
-    return { ...quote, philosopherId, philosopherName: philosopher.name }
+    return { bridge: null, ...quote, philosopherId, philosopherName: philosopher.name }
   }
 
   try {
-    const systemPrompt = buildSystemPrompt(philosopher)
-    const userMessage = [
-      `Topic: ${topic}`,
-      otherPhilosopherStatement
-        ? `The other philosopher just said: "${otherPhilosopherStatement}"`
-        : '',
-      'Respond with your most fitting quote on this topic as JSON.'
-    ]
-      .filter(Boolean)
-      .join('\n')
+    const systemPrompt = buildSystemPrompt(philosopher, topic, topicLabel)
+    const userMessage = otherPhilosopherStatement
+      ? `Topic: ${topicLabel || topic}\nThe other philosopher just said: "${otherPhilosopherStatement}"\n\nRespond with your most fitting quote, and a bridge reacting to their statement.`
+      : `Topic: ${topicLabel || topic}\nOpen the conversation with your most fitting quote (bridge = null).`
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 300,
+      max_tokens: 400,
       system: systemPrompt,
       messages: [{ role: 'user', content: userMessage }]
     })
 
-    const text = response.content[0].text.trim()
-    const parsed = JSON.parse(text)
-    return { ...parsed, philosopherId, philosopherName: philosopher.name }
+    const raw = response.content[0].text.trim()
+    const cleaned = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()
+    const parsed = JSON.parse(cleaned)
+    return {
+      bridge: parsed.bridge || null,
+      text: parsed.text,
+      source: parsed.source,
+      year: parsed.year ?? null,
+      philosopherId,
+      philosopherName: philosopher.name
+    }
   } catch (err) {
     console.error(`Agent error for ${philosopherId}:`, err.message)
-    // Fallback to random quote on any error
     const quote = randomQuote()
-    return { ...quote, philosopherId, philosopherName: philosopher.name }
+    return { bridge: null, ...quote, philosopherId, philosopherName: philosopher.name }
   }
 }

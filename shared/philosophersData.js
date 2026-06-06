@@ -667,18 +667,65 @@ export const PHILOSOPHERS = [
 ];
 
 export const TOPICS = [
-  "suffering", "death", "meaning", "love", "freedom", "truth", "god", "beauty"
+  "technology",
+  "identity",
+  "loneliness",
+  "power",
+  "consumerism",
+  "truth",
+  "freedom",
+  "love",
+  "meaning",
+  "consciousness",
+  "society",
+  "beauty"
 ];
 
 export const TOPIC_LABELS = {
-  suffering: "On Suffering & Pain",
-  death: "On Death & Mortality",
-  meaning: "On Meaning & Purpose",
-  love: "On Love & Human Connection",
-  freedom: "On Freedom & Will",
-  truth: "On Truth & Knowledge",
-  god: "On God & Religion",
-  beauty: "On Beauty & Art"
+  technology:    "AI & The Machine Age",
+  identity:      "Identity & Authenticity",
+  loneliness:    "Modern Loneliness",
+  power:         "Power & Control",
+  consumerism:   "Consumerism & Empty Desire",
+  truth:         "Truth in the Post-Truth Age",
+  freedom:       "Freedom & Modern Constraint",
+  love:          "Love & Digital Romance",
+  meaning:       "The Meaning Crisis",
+  consciousness: "Consciousness & The Inner Life",
+  society:       "Democracy & Mass Psychology",
+  beauty:        "Beauty & The Degradation of Attention"
+};
+
+// Rich context fed to the AI so it picks quotes relevant to the modern topic
+export const TOPIC_CONTEXT = {
+  technology:    "Artificial intelligence replacing human thought, social media algorithms manipulating behavior, machines learning to create art and language. Does technology liberate or enslave? Is the algorithm the new God? What is lost when machines do our thinking for us?",
+  identity:      "People constructing and performing identities on social media, the fragmentation of the self, identity politics reducing people to categories, the question of authenticity when every self is curated for an audience.",
+  loneliness:    "The epidemic of loneliness in the most connected age in history. People stare at screens in crowded rooms. Social media promises community and delivers isolation. The paradox of total communication without genuine communion.",
+  power:         "Surveillance capitalism, governments monitoring citizens, corporations controlling attention and behavior, algorithmic systems deciding who gets what. Who holds real power today, and who is controlled without knowing it?",
+  consumerism:   "A culture built around purchasing, advertising manufacturing desires that never satisfy, people defining themselves by what they own, the spiritual void underneath material abundance, buying happiness that never arrives.",
+  truth:         "Disinformation, fake news, everyone constructing their own reality from algorithmically curated feeds. Experts are doubted, facts are disputed, belief trumps evidence. What does truth mean when perception itself is engineered?",
+  freedom:       "Are people in the modern world more free or less free? Algorithmic manipulation, social conformity, cancel culture, debt, surveillance, addiction by design — the cage is invisible but the bars are everywhere.",
+  love:          "Dating apps reducing human beings to swipeable profiles, hookup culture, the commodification of romance, ghosting as a social norm, people unable to commit because something better might be one scroll away.",
+  meaning:       "Religion declining, traditional communities dissolving, work becoming hollow gig labor, young people without purpose, nihilism rising, the question 'why bother?' growing louder without an answer.",
+  consciousness: "Neuroscience revealing the brain as a machine, AI exhibiting behaviors once called intelligent, free will questioned by determinism. If consciousness is just computation, what makes human experience special?",
+  society:       "Democracy eroding, populism rising, the fragmentation of shared reality, echo chambers making consensus impossible, the crowd manipulated through emotion and fear, political theater replacing governance.",
+  beauty:        "In a world of infinite digital images, is beauty still possible? Attention spans collapsing, craftsmanship dying, AI generating art instantly, aesthetic experience mediated through screens and reduced to likes."
+};
+
+// Maps each modern topic → which classic quote categories to search in
+export const TOPIC_FALLBACK = {
+  technology:    ['truth', 'freedom', 'meaning', 'god'],
+  identity:      ['freedom', 'truth', 'suffering', 'meaning'],
+  loneliness:    ['suffering', 'love', 'death', 'meaning'],
+  power:         ['freedom', 'god', 'truth', 'suffering'],
+  consumerism:   ['suffering', 'meaning', 'beauty', 'death'],
+  truth:         ['truth', 'god', 'freedom', 'meaning'],
+  freedom:       ['freedom', 'suffering', 'meaning', 'death'],
+  love:          ['love', 'suffering', 'meaning', 'beauty'],
+  meaning:       ['meaning', 'suffering', 'death', 'god'],
+  consciousness: ['truth', 'meaning', 'god', 'freedom'],
+  society:       ['freedom', 'truth', 'god', 'suffering'],
+  beauty:        ['beauty', 'love', 'meaning', 'truth'],
 };
 
 export function getQuote(philosopherId, topic) {

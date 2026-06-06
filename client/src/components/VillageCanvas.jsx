@@ -60,10 +60,30 @@ export function VillageCanvas({
       if (phil && onPhilosopherSelect) onPhilosopherSelect(phil)
     }
 
+    // Fetch quotes from server; fall back to local if unavailable
+    async function fetchQuotes(p1Id, p2Id, topic, topicLabel) {
+      try {
+        const res = await fetch('/api/converse', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p1Id, p2Id, topic })
+        })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const conv = await res.json()
+        return conv.quotes
+      } catch {
+        // Server unavailable or no API key — sim will use local fallback
+        throw new Error('server unavailable')
+      }
+    }
+
     const sim = new SimulationLoop({
       onMove: (id, pos, state) => {
         worldRef.current?.updatePhilosopher(id, pos, state)
       },
+
+      onConversationRequest: (p1Id, p2Id, topic, topicLabel) =>
+        fetchQuotes(p1Id, p2Id, topic, topicLabel),
 
       onConversationStart: (conv) => {
         if (conv.isForeground) {

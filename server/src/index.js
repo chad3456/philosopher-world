@@ -60,29 +60,17 @@ io.on('connection', (socket) => {
 
     try {
       // p1 opens
-      const q1 = await getPhilosopherResponse(p1Id, topic, null, [])
+      const q1 = await getPhilosopherResponse(p1Id, topic, topicLabel, null, [])
       socket.emit('quote_delivered', {
-        conversationId,
-        speaker: p1Id,
-        speakerName: p1.name,
-        speakerColor: p1.color,
-        index: 0,
-        ...q1
+        conversationId, speaker: p1Id, speakerName: p1.name, speakerColor: p1.color, index: 0, ...q1
       })
 
-      // p2 responds
-      const q2 = await getPhilosopherResponse(p2Id, topic, q1.text, [q1])
+      const q2 = await getPhilosopherResponse(p2Id, topic, topicLabel, q1.text, [q1])
       socket.emit('quote_delivered', {
-        conversationId,
-        speaker: p2Id,
-        speakerName: p2.name,
-        speakerColor: p2.color,
-        index: 1,
-        ...q2
+        conversationId, speaker: p2Id, speakerName: p2.name, speakerColor: p2.color, index: 1, ...q2
       })
 
-      // p1 responds again
-      const q3 = await getPhilosopherResponse(p1Id, topic, q2.text, [q1, q2])
+      const q3 = await getPhilosopherResponse(p1Id, topic, topicLabel, q2.text, [q1, q2])
       socket.emit('quote_delivered', {
         conversationId,
         speaker: p1Id,

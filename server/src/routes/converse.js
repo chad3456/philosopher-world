@@ -22,9 +22,9 @@ converseRoute.post('/converse', async (req, res) => {
 
   try {
     // Generate alternating conversation: p1 opens, p2 responds, p1 responds
-    const q1 = await getPhilosopherResponse(p1Id, topic, null, [])
-    const q2 = await getPhilosopherResponse(p2Id, topic, q1.text, [q1])
-    const q3 = await getPhilosopherResponse(p1Id, topic, q2.text, [q1, q2])
+    const q1 = await getPhilosopherResponse(p1Id, topic, topicLabel, null, [])
+    const q2 = await getPhilosopherResponse(p2Id, topic, topicLabel, q1.text, [q1])
+    const q3 = await getPhilosopherResponse(p1Id, topic, topicLabel, q2.text, [q1, q2])
 
     const conversation = {
       id: `${Date.now()}-${p1Id}-${p2Id}`,

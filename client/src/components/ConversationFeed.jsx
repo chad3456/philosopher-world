@@ -70,6 +70,14 @@ function ConversationItem({ conversation, compact = false }) {
               <div className="conv-quote-speaker" style={{ color: speakerData.color }}>
                 {speakerData.name.split(' ').pop()}
               </div>
+              {quote.bridge && (
+                <div style={{
+                  fontSize: 12, color: '#9a8870', fontStyle: 'italic',
+                  marginBottom: 4, lineHeight: 1.5
+                }}>
+                  {quote.bridge}
+                </div>
+              )}
               <div className="conv-quote-text">&ldquo;{quote.text}&rdquo;</div>
               {quote.source && (
                 <div className="conv-quote-source">
