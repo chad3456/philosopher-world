@@ -247,7 +247,7 @@ canvas:active {
   position: fixed;
   top: 64px;
   right: 16px;
-  bottom: 16px;
+  bottom: 106px;  /* above TopicRooms dock */
   width: 320px;
   z-index: 50;
   display: flex;

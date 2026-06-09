@@ -1,16 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { PHILOSOPHERS } from '../data/philosophers.js'
-
-const TOPIC_COLORS = {
-  suffering: '#ef4444',
-  death: '#6b7280',
-  meaning: '#8b5cf6',
-  love: '#ec4899',
-  freedom: '#22c55e',
-  truth: '#3b82f6',
-  god: '#f59e0b',
-  beauty: '#06b6d4'
-}
+import { PHILOSOPHERS, TOPIC_LABELS } from '../data/philosophers.js'
+import { TOPIC_COLORS, TOPIC_ICONS } from './TopicRooms.jsx'
 
 function timeAgo(timestamp) {
   const now = new Date()
@@ -92,19 +82,27 @@ function ConversationItem({ conversation, compact = false }) {
   )
 }
 
-export function ConversationFeed({ conversations, followedId }) {
+export function ConversationFeed({ conversations, followedId, tunedTopic }) {
   const scrollRef = useRef(null)
   const [bgCollapsed, setBgCollapsed] = useState(false)
 
   const followedPhil = followedId ? PHILOSOPHERS.find(p => p.id === followedId) : null
+  const topicColor = tunedTopic ? (TOPIC_COLORS[tunedTopic] || '#8b5cf6') : null
+  const topicIcon  = tunedTopic ? (TOPIC_ICONS[tunedTopic]  || '✦') : null
+  const topicLabel = tunedTopic ? (TOPIC_LABELS[tunedTopic]  || tunedTopic) : null
 
-  // Separate foreground and background
-  const fgConvs = followedId
-    ? conversations.filter(c => c.isForeground)
-    : conversations
-  const bgConvs = followedId
-    ? conversations.filter(c => !c.isForeground)
-    : []
+  // Split foreground vs background based on active filter
+  let fgConvs, bgConvs
+  if (tunedTopic) {
+    fgConvs = conversations.filter(c => c.topic === tunedTopic)
+    bgConvs = conversations.filter(c => c.topic !== tunedTopic)
+  } else if (followedId) {
+    fgConvs = conversations.filter(c => c.isForeground)
+    bgConvs = conversations.filter(c => !c.isForeground)
+  } else {
+    fgConvs = conversations
+    bgConvs = []
+  }
 
   useEffect(() => {
     if (scrollRef.current && fgConvs.length > 0) {
@@ -117,7 +115,12 @@ export function ConversationFeed({ conversations, followedId }) {
   return (
     <div className="conversation-feed">
       <div className="feed-header">
-        {followedId && followedPhil ? (
+        {tunedTopic ? (
+          <span>
+            <span style={{ color: topicColor }}>{topicIcon} </span>
+            <span style={{ color: topicColor }}>{topicLabel}</span>
+          </span>
+        ) : followedId && followedPhil ? (
           <span>
             <span style={{ color: followedPhil.color }}>●</span>
             {' '}Following {followedPhil.name.split(' ').pop()}
@@ -126,8 +129,22 @@ export function ConversationFeed({ conversations, followedId }) {
       </div>
 
       <div className="feed-scroll" ref={scrollRef}>
+        {/* Empty state for topic room mode */}
+        {tunedTopic && fgConvs.length === 0 && (
+          <div className="feed-empty" style={{ padding: '24px 16px' }}>
+            <div className="feed-empty-icon" style={{ color: topicColor }}>{topicIcon}</div>
+            <div style={{ fontSize: 13, color: '#8a7860' }}>
+              Waiting for philosophers to discuss<br />
+              <span style={{ color: topicColor, fontSize: 12 }}>{topicLabel}</span>
+              <br /><span style={{ color: '#4a4038', fontSize: 11, marginTop: 4, display: 'block' }}>
+                Conversations on this topic will appear here.
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* FOREGROUND — full detail */}
-        {followedId && !activeFg && (
+        {followedId && !activeFg && !tunedTopic && (
           <div className="feed-empty" style={{ padding: '24px 16px' }}>
             <div className="feed-empty-icon">🚶</div>
             <div style={{ fontSize: 13 }}>

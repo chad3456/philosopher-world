@@ -55,6 +55,7 @@ export class SimulationLoop {
     this.activeConversations = new Set()
     this.pendingQuotes = {}
     this.followedId = null
+    this.tunedTopic = null
     this.pendingRequests = new Set()  // p1Id:p2Id pairs awaiting server response
 
     this.philosophers = {}
@@ -73,8 +74,13 @@ export class SimulationLoop {
     })
   }
 
-  setFollowedPhilosopher(id) {
-    this.followedId = id
+  setFollowedPhilosopher(id) { this.followedId = id }
+  setTunedTopic(topic) { this.tunedTopic = topic }
+
+  _isForeground(p1Id, p2Id, topic) {
+    if (this.tunedTopic) return topic === this.tunedTopic
+    if (this.followedId) return p1Id === this.followedId || p2Id === this.followedId
+    return true
   }
 
   quoteDone(convId, index) {
@@ -107,7 +113,6 @@ export class SimulationLoop {
 
     const p1Data = PHILOSOPHERS.find(p => p.id === p1Id)
     const p2Data = PHILOSOPHERS.find(p => p.id === p2Id)
-    const isForeground = !this.followedId || p1Id === this.followedId || p2Id === this.followedId
 
     this.onConversationStart({
       id: convId,
@@ -115,7 +120,7 @@ export class SimulationLoop {
       p2: { id: p2Id, name: p2Data.name, color: p2Data.color },
       topic, topicLabel, quotes,
       timestamp: new Date().toISOString(),
-      isForeground
+      isForeground: this._isForeground(p1Id, p2Id, topic)
     })
 
     const deliverNext = (quoteIndex) => {
@@ -129,6 +134,8 @@ export class SimulationLoop {
       const q = quotes[quoteIndex]
       const speakerId = q.speaker
       const listenerId = speakerId === p1Id ? p2Id : p1Id
+      // Check dynamically so user can tune in mid-conversation
+      const isForeground = this._isForeground(p1Id, p2Id, topic)
 
       this.onQuoteDelivered(convId, quoteIndex, q, speakerId, listenerId, isForeground)
 

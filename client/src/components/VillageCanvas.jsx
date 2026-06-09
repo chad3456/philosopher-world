@@ -6,7 +6,7 @@ import { PHILOSOPHERS } from '../data/philosophers.js'
 
 export function VillageCanvas({
   onConversationStart, onQuoteDelivered, onConversationEnd,
-  onPhilosopherSelect, speed, voiceEnabled, onVoiceReady, followedId
+  onPhilosopherSelect, speed, voiceEnabled, onVoiceReady, followedId, tunedTopic
 }) {
   const canvasRef = useRef(null)
   const worldRef = useRef(null)
@@ -27,7 +27,6 @@ export function VillageCanvas({
     }
   }, [voiceEnabled])
 
-  // Sync followedId → world camera + sim isForeground logic
   useEffect(() => {
     if (!worldRef.current || !simRef.current) return
     if (followedId) {
@@ -38,6 +37,10 @@ export function VillageCanvas({
       simRef.current.setFollowedPhilosopher(null)
     }
   }, [followedId])
+
+  useEffect(() => {
+    if (simRef.current) simRef.current.setTunedTopic(tunedTopic || null)
+  }, [tunedTopic])
 
   useEffect(() => {
     const canvas = canvasRef.current
